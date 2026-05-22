@@ -1,0 +1,32 @@
+name: Sync Upstream
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    name: Sync Fork with Upstream
+    
+    steps:
+      # 第一步：同步所有标签
+      - name: Sync Tags
+        uses: wei/git-sync@v3
+        with:
+          source_repo: "https://github.com/nginx/nginx.git"
+          source_branch: "refs/tags/*"
+          
+          destination_repo: "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/elysia-mhy/nginx.git"
+          destination_branch: "refs/tags/*"
+      # 第二步：同步所有分支
+      - name: Sync Branches
+        uses: wei/git-sync@v3
+        with:
+          source_repo: "https://github.com/nginx/nginx.git"
+          source_branch: "refs/remotes/source/*"
+          
+          # 注意这里必须带上 GITHUB_TOKEN 才能写入
+          destination_repo: "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/elysia-mhy/nginx.git"
+          destination_branch: "refs/heads/*"
